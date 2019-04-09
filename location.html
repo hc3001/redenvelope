@@ -26,12 +26,25 @@
             transform-origin: 0 0;
             transform: scale(0.3);
         }
+        .acti-text {
+            position: absolute;
+            width: 200px;
+            height: 100px;
+            background-color: #fff;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%);
+            z-index: 10;
+            text-align: center;
+            line-height: 100px;
+        }
     </style>
 </head>
 <body>
     <div class="contents"></div>
 
 <script>
+    var t = null
     var loadBackground = function() {
         var contents = '<div class="con-img"></div>'
         $('.contents').prepend(contents)
@@ -39,61 +52,84 @@
         $('.contents').css('height', winHeight)
     }
 
-    var redEnvelope = function({speed = 4000, size = []} = {}) {
+    var redEnveloperain = function({speed = 8000, sizeRange = ([0.1, 0.4]), contents = ['恭喜中奖']} = {}) {
+        var s = Array.from(arguments)[0]
+        let size = Math.random() * sizeRange[0] + (sizeRange[1] - sizeRange[0])
         let x = -(Math.random() * 150 + 80)
         let y = Math.random() * (Number($(document).width()))
         let angle = Math.random() * 90
-        insertImg(x, y, speed, angle)
-        setTimeout(function() {
-            redEnvelope()
+        let text = contents[Math.floor(Math.random() * contents.length)]
+        insertImg(x, y, speed, angle, size, text, t)
+        t = setTimeout(function() {
+            redEnveloperain(s)
         }, 600)
     }
 
-    var insertImg = function(x, y, speed, angle) {
-        var p = {}
+    var insertImg = function(x, y, speed, angle, size, text) {
+        var p = {
+            x,
+            y,
+            speed,
+            size,
+            text,
+            image,
+            angle,
+        }
         var image = new Image()
-        image.src = "redenvelope.png"
+        image.src = "redenvelope.png" //异步过程
         $(image).addClass("red-img")
         $('.con-img').prepend(image)
-        p.elem = image
+        p.image = image
         p.height = image.height
         p.width = image.width
-        p.x = x
-        p.y = y + image.width * 0.3
-        p.speed = speed
-        p.angle = angle
+
         var r = new Redenvelop(p)
         r.moveRedenvelop()
+        console.log(p, t)
+        //显示活动名称
+        $(p.image).click(function() {
+            r.showText(text)
+            $('.con-img').html('')
+            clearTimeout(t)
+        })
     }
 
     class Redenvelop {
-        constructor({x, y, height, width, speed, angle = 0, elem}) {
+        constructor({x, y, height, width, speed, angle = 0, image, size}) {
             this.x = x
             this.y = y
             this.height = height
             this.width = width
             this.speed = speed
-            this.angle = angle
-            this.elem = $(elem)
-            this.elem.css({
+            this.image = $(image)
+            this.image.css({
                 "top": this.x + "px",
-                "left": this.y + 'px',
+                "left": this.y + this.width * 0.3 + 'px',
                 "transform-origin": "0 0",
-                "transform": "scale(0.3) rotate(" + this.angle + "deg)",
+                "transform": "scale(" + size + ") rotate(" + angle + "deg)",
             })
         }
         moveRedenvelop() {
             var winHeight = $(document).height() - this.height * 0.3
-            this.elem.animate({
+            this.image.animate({
                 top: winHeight
             }, this.speed, 'linear', function() {
                 $(this).remove()
             })
         }
+        showText(text) {
+            var t = '<div class="acti-text"></div>'
+            $('.contents').prepend(t)
+            $('.acti-text').html(text)
+        }
     }
     var _main = function() {
         loadBackground()
-        redEnvelope()
+        redEnveloperain({
+            speed: 15000,
+            sizeRange: [0.3, 0.4],
+            contents: ['恭喜你中一等奖', '恭喜你中二等奖', '恭喜你中三等奖']
+        })
     }
     _main()
 
