@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>red</title>
+    <title>分时段红包雨</title>
     <script src="jquery.min.js"></script>
     <style>
         body {
@@ -45,6 +45,39 @@
 
 <script>
     var t = null
+    var getRedraindetail = function() {
+        $.ajax({
+            type: 'get',
+            url: 'https://easy-mock.com/mock/5b78ddf0de86980870733379/aysntest/getTime',
+            data: '',
+            success: function(res) {
+                console.log(res)
+                var params = res.retData
+                if(res.code === '0') {
+                    params.forEach(function(val) {
+                        var beginTime = Number(val.beginTime)
+                        var continueTime = Number(val.continueTime)
+                        var detail = val.detail
+                        var nowTime = Date.now()
+                        console.log('sd', nowTime <= beginTime + continueTime, detail)
+                        if(nowTime <= beginTime + continueTime) {
+                            if(beginTime < nowTime) {
+                                redEnveloperain(detail)
+                            } else {
+                                clearTimeout(t)
+                            }
+                        }
+                    })
+                }
+            }
+        })
+    }
+
+//    var showredEnvelope = function(params) {
+//
+//    }
+
+
     var loadBackground = function() {
         var contents = '<div class="con-img"></div>'
         $('.contents').prepend(contents)
@@ -52,17 +85,17 @@
         $('.contents').css('height', winHeight)
     }
 
-    var redEnveloperain = function({speed = 8000, sizeRange = ([0.1, 0.4]), contents = ['恭喜中奖']} = {}) {
+    var redEnveloperain = function({density = 1000, speed = 8000, sizeRange = ([0.1, 0.4]), contents = ['恭喜中奖'], } = {}) {
         var s = Array.from(arguments)[0]
         let size = Math.random() * sizeRange[0] + (sizeRange[1] - sizeRange[0])
         let x = -(Math.random() * 150 + 80)
         let y = Math.random() * (Number($(document).width()))
         let angle = Math.random() * 90
         let text = contents[Math.floor(Math.random() * contents.length)]
-        insertImg(x, y, speed, angle, size, text, t)
+        insertImg(x, y, speed, angle, size, text)
         t = setTimeout(function() {
             redEnveloperain(s)
-        }, 600)
+        }, density)
     }
 
     var insertImg = function(x, y, speed, angle, size, text) {
@@ -82,7 +115,6 @@
         p.image = image
         p.height = image.height
         p.width = image.width
-
         var r = new Redenvelop(p)
         r.moveRedenvelop()
         console.log(p, t)
@@ -125,12 +157,9 @@
     }
     var _main = function() {
         loadBackground()
-        redEnveloperain({
-            speed: 15000,
-            sizeRange: [0.3, 0.4],
-            contents: ['恭喜你中一等奖', '恭喜你中二等奖', '恭喜你中三等奖']
-        })
+        getRedraindetail()
     }
+
     _main()
 
 </script>
