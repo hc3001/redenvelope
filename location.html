@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>red</title>
+    <script src="jquery.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .contents {
+            width: 100%;
+            height: 100%;
+        }
+        .con-img {
+            position: absolute;
+            background-color: rgba(128, 128, 128, 0.13);
+            width: 100%;
+            height: 100%;
+        }
+        .red-img {
+            position: absolute;
+            top: -88px;
+            left: 58px;
+            transform-origin: 0 0;
+            transform: scale(0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="contents"></div>
+
+<script>
+    var loadBackground = function() {
+        var contents = '<div class="con-img"></div>'
+        $('.contents').prepend(contents)
+        var winHeight = $(document).height()
+        $('.contents').css('height', winHeight)
+    }
+
+    var redEnvelope = function({speed = 4000, size = []} = {}) {
+        let x = -(Math.random() * 150 + 80)
+        let y = Math.random() * (Number($(document).width()))
+        let angle = Math.random() * 90
+        insertImg(x, y, speed, angle)
+        setTimeout(function() {
+            redEnvelope()
+        }, 600)
+    }
+
+    var insertImg = function(x, y, speed, angle) {
+        var p = {}
+        var image = new Image()
+        image.src = "redenvelope.png"
+        $(image).addClass("red-img")
+        $('.con-img').prepend(image)
+        p.elem = image
+        p.height = image.height
+        p.width = image.width
+        p.x = x
+        p.y = y + image.width * 0.3
+        p.speed = speed
+        p.angle = angle
+        var r = new Redenvelop(p)
+        r.moveRedenvelop()
+    }
+
+    class Redenvelop {
+        constructor({x, y, height, width, speed, angle = 0, elem}) {
+            this.x = x
+            this.y = y
+            this.height = height
+            this.width = width
+            this.speed = speed
+            this.angle = angle
+            this.elem = $(elem)
+            this.elem.css({
+                "top": this.x + "px",
+                "left": this.y + 'px',
+                "transform-origin": "0 0",
+                "transform": "scale(0.3) rotate(" + this.angle + "deg)",
+            })
+        }
+        moveRedenvelop() {
+            var winHeight = $(document).height() - this.height * 0.3
+            this.elem.animate({
+                top: winHeight
+            }, this.speed, 'linear', function() {
+                $(this).remove()
+            })
+        }
+    }
+    var _main = function() {
+        loadBackground()
+        redEnvelope()
+    }
+    _main()
+
+</script>
+</body>
+</html>
