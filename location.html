@@ -45,6 +45,7 @@
 
 <script>
     var t = null
+    var k = null
     var getRedraindetail = function() {
         $.ajax({
             type: 'get',
@@ -54,29 +55,40 @@
                 console.log(res)
                 var params = res.retData
                 if(res.code === '0') {
-                    params.forEach(function(val) {
+                    for (var i = 0; i < params.length; i++) {
+                        var val = params[i]
                         var beginTime = Number(val.beginTime)
                         var continueTime = Number(val.continueTime)
                         var detail = val.detail
                         var nowTime = Date.now()
-                        console.log('sd', nowTime <= beginTime + continueTime, detail)
-                        if(nowTime <= beginTime + continueTime) {
-                            if(beginTime < nowTime) {
-                                redEnveloperain(detail)
-                            } else {
-                                clearTimeout(t)
-                            }
-                        }
-                    })
+                        var s = new ShowredEnvelope(detail, beginTime, continueTime) //用构造函数每次用不一样的实例，或者用继发先后执行showredEnvelope
+                        s.redenvelopeAction()
+                    }
                 }
             }
         })
     }
 
-//    var showredEnvelope = function(params) {
-//
-//    }
-
+    class ShowredEnvelope {
+        constructor(detail, beginTime, continueTime) {
+            this.detail = detail
+            this.beginTime = beginTime
+            this.continueTime = continueTime
+        }
+        redenvelopeAction() {
+            k = setInterval(()=> {
+                if(Date.now() <= this.beginTime + this.continueTime && Date.now() > this.beginTime) {
+                    redEnveloperain(this.detail)
+                }
+            }, 1000)
+            setInterval(()=> {
+                if(Date.now() > this.beginTime + this.continueTime) {
+                    clearInterval(k)
+                    clearInterval(t)
+                }
+            }, 1000)
+        }
+    }
 
     var loadBackground = function() {
         var contents = '<div class="con-img"></div>'
@@ -85,7 +97,8 @@
         $('.contents').css('height', winHeight)
     }
 
-    var redEnveloperain = function({density = 1000, speed = 8000, sizeRange = ([0.1, 0.4]), contents = ['恭喜中奖'], } = {}) {
+    var redEnveloperain = function({density = 1000, speed = 10000, sizeRange = ([0.1, 0.4]), contents = ['恭喜中奖'], } = {}) {
+        console.log('test')
         var s = Array.from(arguments)[0]
         let size = Math.random() * sizeRange[0] + (sizeRange[1] - sizeRange[0])
         let x = -(Math.random() * 150 + 80)
@@ -117,7 +130,6 @@
         p.width = image.width
         var r = new Redenvelop(p)
         r.moveRedenvelop()
-        console.log(p, t)
         //显示活动名称
         $(p.image).click(function() {
             r.showText(text)
